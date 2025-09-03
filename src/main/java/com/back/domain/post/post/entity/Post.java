@@ -75,7 +75,7 @@ public class Post extends BaseEntity {
      * - 부모 자체를 삭제하면 cascade=REMOVE 로 자식 전체가 자동 삭제
      */
     public boolean deleteComment(PostComment postComment) {
-        if (postComment != null) return false;
+        if (postComment == null) return false;
 
         return comments.remove(postComment);
     }
