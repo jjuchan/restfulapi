@@ -36,4 +36,14 @@ public class ApiV1PostController {
 
         return new PostDto(item);
     }
+
+    @Transactional
+    @GetMapping("/{id}/delete")
+    public PostDto delete(@PathVariable Long id) {
+        Post item = postService.findById(id);
+
+        postService.delete(item);
+
+        return new PostDto(item);
+    }
 }

@@ -61,4 +61,8 @@ public class PostService {
         // 자식 엔티티(PostComment)의 필드 변경 → 더티 체킹에 의해 UPDATE 실행
         postComment.modify(content);
     }
+
+    public void delete(Post post) {
+        postRepository.delete(post);
+    }
 }
