@@ -8,8 +8,6 @@ import com.back.domain.post.post.service.PostService;
 import com.back.global.rsData.RsData;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -52,17 +50,14 @@ public class ApiV1PostController {
 
     @PostMapping
     @Transactional
-    public ResponseEntity<RsData<PostWriteResBody>> write(@Valid @RequestBody PostWriteReqBody form) {
+    public RsData<PostWriteResBody> write(@Valid @RequestBody PostWriteReqBody form) {
         Post post = postService.create(form.title(), form.content());
 
 
-        return new ResponseEntity<>(
-                new RsData<>(
-                        "200-1",
-                        "%d번 게시글이 생성되었습니다.".formatted(post.getId()),
-                        new PostWriteResBody(postService.count(), new PostDto(post))
-                ),
-                HttpStatus.CREATED
+        return new RsData<>(
+                "200-1",
+                "%d번 게시글이 작성되었습니다.".formatted(post.getId()),
+                new PostWriteResBody(postService.count(), new PostDto(post))
         );
     }
 }
