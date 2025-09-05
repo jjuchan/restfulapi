@@ -60,4 +60,6 @@ public class ApiV1PostController {
                 new PostWriteResBody(postService.count(), new PostDto(post))
         );
     }
+
+
 }
