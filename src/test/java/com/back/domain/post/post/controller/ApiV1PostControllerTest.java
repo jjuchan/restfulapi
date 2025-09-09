@@ -179,4 +179,24 @@ public class ApiV1PostControllerTest {
                     .andExpect(jsonPath("$[%d].content".formatted(i)).value(post.getContent()));
         }
     }
+
+
+    @Test
+    @DisplayName("글 단건조회, 404")
+    void t6() throws Exception {
+        long id = 9999;
+
+        //요청을 보냅니다.
+        ResultActions resultActions = mvc
+                .perform(
+                        get("/api/v1/posts/" + id)
+                )
+                .andDo(print()); // 응답을 출력합니다.
+
+        // 200 Ok 상태코드 검증
+        resultActions
+                .andExpect(handler().handlerType(ApiV1PostController.class))
+                .andExpect(handler().methodName("getItem"))
+                .andExpect(status().isNotFound());
+    }
 }
