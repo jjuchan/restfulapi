@@ -14,8 +14,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -49,7 +48,6 @@ public class ApiV1PostControllerTest {
                 .andDo(print()); // 응답을 출력합니다.
 
         Post post = postService.findLatest().get();
-        long totalCount = postService.count();
 
         // 201 Created 상태코드 검증
         resultActions
@@ -71,10 +69,11 @@ public class ApiV1PostControllerTest {
     @DisplayName("글 수정")
     void t2() throws Exception {
         long id = 1;
+
         //요청을 보냅니다.
         ResultActions resultActions = mvc
                 .perform(
-                        put("/api/v1/posts" + id)
+                        put("/api/v1/posts/" + id)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content("""
                                         {
@@ -91,5 +90,34 @@ public class ApiV1PostControllerTest {
                 .andExpect(handler().methodName("modify"))
                 .andExpect(jsonPath("$.resultCode").value("200-1"))
                 .andExpect(jsonPath("$.msg").value("%d번 게시글이 수정되었습니다.".formatted(id)));
+
+//        Post post = postService.findById(id);
+//
+//        assertThat(post.getTitle().equals("제목 update"));
+//        assertThat(post.getContent().equals("내용 update"));
+    }
+
+    //글 삭제 테스트
+    @Test
+    @DisplayName("글 삭제")
+    void t3() throws Exception {
+        long id = 1;
+
+        //요청을 보냅니다.
+        ResultActions resultActions = mvc
+                .perform(
+                        delete("/api/v1/posts/" + id)
+
+                )
+                .andDo(print()); // 응답을 출력합니다.
+        // 200 Ok 상태코드 검증
+        resultActions
+                .andExpect(status().isOk())
+                .andExpect(handler().handlerType(ApiV1PostController.class))
+                .andExpect(handler().methodName("delete"))
+                .andExpect(jsonPath("$.resultCode").value("200-1"))
+                .andExpect(jsonPath("$.msg").value("%d번 게시글이 삭제되었습니다.".formatted(id)))
+                .andExpect(jsonPath("$.data.id").value(id));
+
     }
 }
