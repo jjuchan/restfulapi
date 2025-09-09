@@ -70,10 +70,11 @@ public class ApiV1PostControllerTest {
     @Test
     @DisplayName("글 수정")
     void t2() throws Exception {
+        long id = 1;
         //요청을 보냅니다.
         ResultActions resultActions = mvc
                 .perform(
-                        put("/api/v1/posts/1")
+                        put("/api/v1/posts" + id)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content("""
                                         {
@@ -85,6 +86,10 @@ public class ApiV1PostControllerTest {
                 .andDo(print()); // 응답을 출력합니다.
         // 200 Ok 상태코드 검증
         resultActions
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(handler().handlerType(ApiV1PostController.class))
+                .andExpect(handler().methodName("modify"))
+                .andExpect(jsonPath("$.resultCode").value("200-1"))
+                .andExpect(jsonPath("$.msg").value("%d번 게시글이 수정되었습니다.".formatted(id)));
     }
 }
