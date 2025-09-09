@@ -66,6 +66,93 @@ public class ApiV1PostControllerTest {
 
     }
 
+    //글쓰기 제목 누락 테스트
+    @Test
+    @DisplayName("글 쓰기 400 - 제목 누락")
+    void t7() throws Exception {
+        //요청을 보냅니다.
+        ResultActions resultActions = mvc
+                .perform(
+                        post("/api/v1/posts")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("""
+                                        {
+                                            "title": "",
+                                            "content": "내용"
+                                        }
+                                        """)
+                )
+                .andDo(print()); // 응답을 출력합니다.
+
+        // 400 BadRequest 상태코드 검증
+        resultActions
+                .andExpect(handler().handlerType(ApiV1PostController.class))
+                .andExpect(handler().methodName("write"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.resultCode").value("400-1"))
+                .andExpect(jsonPath("$.msg").value("""
+                        title-NotBlank-must not be blank
+                        title-Size-size must be between 2 and 100
+                        """.stripIndent().trim()));
+    }
+
+    //글쓰기 내용 누락 테스트
+    @Test
+    @DisplayName("글 쓰기 400 - 내용 누락")
+    void t8() throws Exception {
+        //요청을 보냅니다.
+        ResultActions resultActions = mvc
+                .perform(
+                        post("/api/v1/posts")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("""
+                                        {
+                                            "title": "제목",
+                                            "content": ""
+                                        }
+                                        """)
+                )
+                .andDo(print()); // 응답을 출력합니다.
+
+        // 400 BadRequest 상태코드 검증
+        resultActions
+                .andExpect(handler().handlerType(ApiV1PostController.class))
+                .andExpect(handler().methodName("write"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.resultCode").value("400-1"))
+                .andExpect(jsonPath("$.msg").value("""
+                        content-NotBlank-must not be blank
+                        content-Size-size must be between 2 and 2000
+                        """.stripIndent().trim()));
+    }
+
+    //글쓰기 JSON 문법 에러 테스트
+    @Test
+    @DisplayName("글 쓰기 400 - JSON 문법 에러")
+    void t9() throws Exception {
+        //요청을 보냅니다.
+        ResultActions resultActions = mvc
+                .perform(
+                        post("/api/v1/posts")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("""
+                                        {
+                                            "title": "제목",
+                                            content": "내용"
+                                        }
+                                        """)
+                )
+                .andDo(print()); // 응답을 출력합니다.
+
+        // 400 BadRequest 상태코드 검증
+        resultActions
+                .andExpect(handler().handlerType(ApiV1PostController.class))
+                .andExpect(handler().methodName("write"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.resultCode").value("400-1"))
+                .andExpect(jsonPath("$.msg").value("요청 본문 형식이 올바르지 않습니다."));
+    }
+
     //글 수정 테스트
     @Test
     @DisplayName("글 수정")
@@ -146,6 +233,25 @@ public class ApiV1PostControllerTest {
                 .andExpect(jsonPath("$.content").value(post.getContent()));
     }
 
+    @Test
+    @DisplayName("글 단건조회, 404")
+    void t6() throws Exception {
+        long id = Integer.MAX_VALUE;
+
+        //요청을 보냅니다.
+        ResultActions resultActions = mvc
+                .perform(
+                        get("/api/v1/posts/" + id)
+                )
+                .andDo(print()); // 응답을 출력합니다.
+
+        // 404 NotFound상태코드 검증
+        resultActions
+                .andExpect(status().isNotFound())
+                .andExpect(handler().handlerType(ApiV1PostController.class))
+                .andExpect(handler().methodName("getItem"));
+    }
+
 
     @Test
     @DisplayName("글 다건조회")
@@ -178,25 +284,5 @@ public class ApiV1PostControllerTest {
                     .andExpect(jsonPath("$[%d].title".formatted(i)).value(post.getTitle()))
                     .andExpect(jsonPath("$[%d].content".formatted(i)).value(post.getContent()));
         }
-    }
-
-
-    @Test
-    @DisplayName("글 단건조회, 404")
-    void t6() throws Exception {
-        long id = 9999;
-
-        //요청을 보냅니다.
-        ResultActions resultActions = mvc
-                .perform(
-                        get("/api/v1/posts/" + id)
-                )
-                .andDo(print()); // 응답을 출력합니다.
-
-        // 200 Ok 상태코드 검증
-        resultActions
-                .andExpect(handler().handlerType(ApiV1PostController.class))
-                .andExpect(handler().methodName("getItem"))
-                .andExpect(status().isNotFound());
     }
 }

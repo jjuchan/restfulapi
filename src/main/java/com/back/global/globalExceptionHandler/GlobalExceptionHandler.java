@@ -1,41 +1,62 @@
 package com.back.global.globalExceptionHandler;
 
 import com.back.global.rsData.RsData;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.util.Comparator;
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 
-/**
- * 전역 예외 처리를 담당하는 클래스
- *
- * @RestControllerAdvice
- *  - 모든 @RestController 전역에서 발생하는 예외를 가로채 처리할 수 있도록 설정.
- *  - 공통적인 예외 처리 로직을 한 곳에서 관리 가능.
- */
-@RestControllerAdvice
-@RequiredArgsConstructor
+@ControllerAdvice
 public class GlobalExceptionHandler {
-
-    /**
-     * NoSuchElementException 발생 시 실행되는 핸들러
-     *
-     * @ExceptionHandler(NoSuchElementException.class)
-     *  - 특정 예외 타입(NoSuchElementException)을 감지해서 이 메서드로 처리.
-     *
-     * @ResponseStatus(HttpStatus.NOT_FOUND)
-     *  - HTTP 응답 상태를 404(Not Found)로 반환.
-     */
     @ExceptionHandler(NoSuchElementException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public RsData<Void> handle() {
-        return new RsData<>(
-                "404-1",
-                "해당 데이터가 존재하지 않습니다."
+    public ResponseEntity<RsData<Void>> handle(NoSuchElementException e) {
+        return new ResponseEntity<>(
+                new RsData<>(
+                        "404-1",
+                        "존재하지 않는 데이터에 접근했습니다."
+                ),
+                NOT_FOUND
+        );
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<RsData<Void>> handle(MethodArgumentNotValidException e) {
+        String message = e.getBindingResult()
+                .getAllErrors()
+                .stream()
+                .filter(error -> error instanceof FieldError)
+                .map(error -> (FieldError) error)
+                .map(error -> error.getField() + "-" + error.getCode() + "-" + error.getDefaultMessage())
+                .sorted(Comparator.comparing(String::toString))
+                .collect(Collectors.joining("\n"));
+
+        return new ResponseEntity<>(
+                new RsData<>(
+                        "400-1",
+                        message
+                ),
+                BAD_REQUEST
+        );
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<RsData<Void>> handle(HttpMessageNotReadableException e) {
+
+        return new ResponseEntity<>(
+                new RsData<>(
+                        "400-1",
+                        "요청 본문 형식이 올바르지 않습니다."
+                ),
+                BAD_REQUEST
         );
     }
 }
