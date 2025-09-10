@@ -1,6 +1,9 @@
 package com.back.domain.post.postComment.controller;
 
+import com.back.domain.post.post.entity.Post;
 import com.back.domain.post.post.service.PostService;
+import com.back.domain.post.postComment.entity.PostComment;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,8 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.handler;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ActiveProfiles("test") // 테스트 환경에서는 test 프로파일을 활성화합니다.
 @SpringBootTest // 스프링부트 테스트 클래스임을 나타냅니다.
@@ -28,23 +30,30 @@ public class ApiPostCommentControllerTest {
     private PostService postService;
 
     @Test
-    @DisplayName("댓글 단건조회")
+    @DisplayName("댓글 조회 단건")
     void t1() throws Exception {
         long postId = 1;
         long id = 1;
 
+        //요청을 보냅니다.
         ResultActions resultActions = mvc
                 .perform(
                         get("/api/v1/posts/%d/comments/%d".formatted(postId, id))
-
                 )
-                .andDo(print());
+                .andDo(print()); // 응답을 출력합니다.
 
+        Post post = postService.findById(postId);
+        PostComment postComment = post.findCommentById(id).get();
+
+        // 200 Ok 상태코드 검증
         resultActions
                 .andExpect(status().isOk())
                 .andExpect(handler().handlerType(ApiV1PostCommentController.class))
-                .andExpect(handler().methodName("getItem"));
-
+                .andExpect(handler().methodName("getItem"))
+                .andExpect(jsonPath("$.id").value(postComment.getId()))
+                .andExpect(jsonPath("$.createDate").value(Matchers.startsWith(postComment.getCreateDate().toString().substring(0, 20))))
+                .andExpect(jsonPath("$.modifyDate").value(Matchers.startsWith(postComment.getModifyDate().toString().substring(0, 20))))
+                .andExpect(jsonPath("$.content").value(postComment.getContent()));
     }
 
     @Test
