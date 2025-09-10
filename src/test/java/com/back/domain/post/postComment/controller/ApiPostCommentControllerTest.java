@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -89,5 +90,29 @@ public class ApiPostCommentControllerTest {
                     .andExpect(jsonPath("$[%d].modifyDate".formatted(i)).value(Matchers.startsWith(postComment.getModifyDate().toString().substring(0, 20))))
                     .andExpect(jsonPath("$[%d].content".formatted(i)).value(postComment.getContent()));
         }
+    }
+
+    //댓글 삭제
+    @Test
+    @DisplayName("댓글 삭제 다건")
+    void t3() throws Exception {
+        long postId = 1;
+        long id = 1;
+
+        //요청을 보냅니다.
+        ResultActions resultActions = mvc
+                .perform(
+                        delete("/api/v1/posts/%d/comments/%d".formatted(postId, id))
+                )
+                .andDo(print()); // 응답을 출력합니다.
+
+
+        // 200 Ok 상태코드 검증
+        resultActions
+                .andExpect(status().isOk())
+                .andExpect(handler().handlerType(ApiV1PostCommentController.class))
+                .andExpect(handler().methodName("delete"))
+                .andExpect(jsonPath("$.resultCode").value("200-1"))
+                .andExpect(jsonPath("$.msg").value("%d번 댓글이 삭제되었습니다.".formatted(id)));
     }
 }
