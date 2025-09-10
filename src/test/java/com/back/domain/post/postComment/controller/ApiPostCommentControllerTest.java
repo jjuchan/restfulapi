@@ -14,6 +14,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -57,20 +59,35 @@ public class ApiPostCommentControllerTest {
     }
 
     @Test
-    @DisplayName("댓글 다건조회")
+    @DisplayName("댓글 조회 다건")
     void t2() throws Exception {
         long postId = 1;
 
+        //요청을 보냅니다.
         ResultActions resultActions = mvc
                 .perform(
                         get("/api/v1/posts/%d/comments".formatted(postId))
                 )
-                .andDo(print());
+                .andDo(print()); // 응답을 출력합니다.
 
+        Post post = postService.findById(postId);
+        List<PostComment> comments = post.getComments();
+
+        // 200 Ok 상태코드 검증
         resultActions
                 .andExpect(status().isOk())
                 .andExpect(handler().handlerType(ApiV1PostCommentController.class))
-                .andExpect(handler().methodName("getItems"));
+                .andExpect(handler().methodName("getItems"))
+                .andExpect(jsonPath("$.length()").value(comments.size()));
 
+
+        for (int i = 0; i < comments.size(); i++) {
+            PostComment postComment = comments.get(i);
+            resultActions
+                    .andExpect(jsonPath("$[%d].id".formatted(i)).value(postComment.getId()))
+                    .andExpect(jsonPath("$[%d].createDate".formatted(i)).value(Matchers.startsWith(postComment.getCreateDate().toString().substring(0, 20))))
+                    .andExpect(jsonPath("$[%d].modifyDate".formatted(i)).value(Matchers.startsWith(postComment.getModifyDate().toString().substring(0, 20))))
+                    .andExpect(jsonPath("$[%d].content".formatted(i)).value(postComment.getContent()));
+        }
     }
 }
