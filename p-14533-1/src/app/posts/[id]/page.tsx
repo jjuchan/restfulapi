@@ -1,14 +1,11 @@
 'use client'
 
 import { apiFetch } from '@/lib/backend/client'
+import { PostDto } from '@/types/post'
 import { use, useEffect, useState } from 'react'
 
 export default function Page({ params }: { params: Promise<{ id: number }> }) {
-    const [post, setPost] = useState<{
-        id: number
-        title: string
-        content: string
-    } | null>(null)
+    const [post, setPost] = useState<PostDto | null>(null)
 
     const { id } = use(params)
 

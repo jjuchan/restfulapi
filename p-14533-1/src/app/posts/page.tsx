@@ -1,13 +1,15 @@
 'use client'
 
 import { apiFetch } from '@/lib/backend/client'
+import { PostDto } from '@/types/post'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 
 export default function Page() {
-    const [posts, setPosts] = useState<{ id: number; title: string }[]>([])
+    const [posts, setPosts] = useState<PostDto[]>([])
 
     useEffect(() => {
+        // (data) => setPosts(data) == setPosts
         apiFetch('/api/v1/posts').then(setPosts)
     }, [])
     if (posts.length === 0) return <div>로딩중...</div>
@@ -19,7 +21,8 @@ export default function Page() {
                 {posts.map((post) => (
                     <li key={post.id}>
                         {post.id} /
-                        <Link href={`/posts/${post.id}`}>{post.title}</Link>
+                        <Link href={`/posts/${post.id}`}>{post.title}</Link> /
+                        {post.content}
                     </li>
                 ))}
             </ul>
