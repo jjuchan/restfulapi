@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useEffect, useState } from 'react'
 
 export default function Page() {
@@ -10,16 +11,17 @@ export default function Page() {
             .then((res) => res.json())
             .then((data) => setPosts(data))
     }, [])
+    if (posts.length === 0) return <div>로딩중...</div>
 
     return (
         <>
             <h1>글 목록</h1>
-
-            {posts.length === 0 && <div>로딩중...</div>}
-
             <ul>
                 {posts.map((post) => (
-                    <li key={post.id}>{post.title}</li>
+                    <li key={post.id}>
+                        {post.id} /
+                        <Link href={`/posts/${post.id}`}>{post.title}</Link>
+                    </li>
                 ))}
             </ul>
         </>
