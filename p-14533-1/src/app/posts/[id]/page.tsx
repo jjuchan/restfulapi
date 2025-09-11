@@ -1,8 +1,7 @@
 'use client'
 
+import { apiFetch } from '@/lib/backend/client'
 import { use, useEffect, useState } from 'react'
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
 
 export default function Page({ params }: { params: Promise<{ id: number }> }) {
     const [post, setPost] = useState<{
@@ -14,9 +13,7 @@ export default function Page({ params }: { params: Promise<{ id: number }> }) {
     const { id } = use(params)
 
     useEffect(() => {
-        fetch(`${API_BASE_URL}/api/v1/posts/${id}`)
-            .then((res) => res.json())
-            .then((data) => setPost(data))
+        apiFetch(`/api/v1/posts/${id}`).then(setPost)
     }, [])
 
     if (post === null) return <div>로딩중...</div>
