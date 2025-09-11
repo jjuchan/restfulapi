@@ -2,6 +2,8 @@
 
 import { use, useEffect, useState } from 'react'
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
+
 export default function Page({ params }: { params: Promise<{ id: number }> }) {
     const [post, setPost] = useState<{
         id: number
@@ -12,24 +14,21 @@ export default function Page({ params }: { params: Promise<{ id: number }> }) {
     const { id } = use(params)
 
     useEffect(() => {
-        fetch(`http://localhost:8080/api/v1/posts/${id}`)
+        fetch(`${API_BASE_URL}/api/v1/posts/${id}`)
             .then((res) => res.json())
             .then((data) => setPost(data))
     }, [])
 
+    if (post === null) return <div>로딩중...</div>
+
     return (
         <>
             <h1>게시글 상세페이지</h1>
-
-            {post === null && <div>로딩중...</div>}
-
-            {post !== null && (
-                <>
-                    <div>게시글 번호: {post.id}</div>
-                    <div>게시글 제목: {post.title}</div>
-                    <div>게시글 내용: {post.content}</div>
-                </>
-            )}
+            <>
+                <div>게시글 번호: {post?.id}</div>
+                <div>게시글 제목: {post?.title}</div>
+                <div>게시글 내용: {post?.content}</div>
+            </>
         </>
     )
 }
