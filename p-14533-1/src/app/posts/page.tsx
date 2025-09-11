@@ -26,6 +26,10 @@ export default function Page() {
                     </li>
                 ))}
             </ul>
+
+            <div>
+                <Link href="/posts/write">글쓰기</Link>
+            </div>
         </>
     )
 }
