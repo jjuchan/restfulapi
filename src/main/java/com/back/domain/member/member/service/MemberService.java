@@ -1,7 +1,7 @@
 package com.back.domain.member.member.service;
 
 import com.back.domain.member.member.entity.Member;
-import com.back.domain.member.repository.MemberRepository;
+import com.back.domain.member.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -21,7 +21,7 @@ public class MemberService {
         return memberRepository.save(member);
     }
 
-    public Optional <Member> findByUsername(String username) {
+    public Optional<Member> findByUsername(String username) {
         return memberRepository.findByUsername(username);
     }
 }
