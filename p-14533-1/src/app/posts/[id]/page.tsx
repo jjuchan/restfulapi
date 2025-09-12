@@ -27,6 +27,16 @@ export default function Page({ params }: { params: Promise<{ id: number }> }) {
         })
     }
 
+    const deletePostComment = (id: number, commentId: number) => {
+        if (!confirm('정말 삭제하시겠습니까?')) return
+
+        apiFetch(`/api/v1/posts/${id}/comments/${commentId}`, {
+            method: 'DELETE',
+        }).then((data) => {
+            alert(data.msg)
+        })
+    }
+
     useEffect(() => {
         apiFetch(`/api/v1/posts/${id}`).then(setPost)
 
@@ -66,7 +76,17 @@ export default function Page({ params }: { params: Promise<{ id: number }> }) {
             {postComments !== null && postComments.length > 0 && (
                 <ul>
                     {postComments.map((comment) => (
-                        <li key={comment.id}>{comment.content}</li>
+                        <li key={comment.id}>
+                            {comment.content}
+                            <button
+                                className="p-2 rounded border"
+                                onClick={() =>
+                                    deletePostComment(id, comment.id)
+                                }
+                            >
+                                삭제
+                            </button>
+                        </li>
                     ))}
                 </ul>
             )}
