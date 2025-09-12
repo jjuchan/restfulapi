@@ -3,3 +3,8 @@ export type PostDto = {
     title: string
     content: string
 }
+
+export type PostCommentDto = {
+    id: number
+    content: string
+}

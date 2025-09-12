@@ -1,12 +1,16 @@
 'use client'
 
 import { apiFetch } from '@/lib/backend/client'
-import { PostDto } from '@/types/post'
+import { PostCommentDto, PostDto } from '@/types/post'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { use, useEffect, useState } from 'react'
 
 export default function Page({ params }: { params: Promise<{ id: number }> }) {
     const [post, setPost] = useState<PostDto | null>(null)
+    const [postComments, setPostComments] = useState<PostCommentDto[] | null>(
+        null,
+    )
 
     const { id } = use(params)
 
@@ -25,6 +29,8 @@ export default function Page({ params }: { params: Promise<{ id: number }> }) {
 
     useEffect(() => {
         apiFetch(`/api/v1/posts/${id}`).then(setPost)
+
+        apiFetch(`/api/v1/posts/${id}/comments`).then(setPostComments)
     }, [])
 
     if (post === null) return <div>로딩중...</div>
@@ -45,7 +51,25 @@ export default function Page({ params }: { params: Promise<{ id: number }> }) {
                 >
                     삭제
                 </button>
+                <Link
+                    className="p-2 rounded border"
+                    href={`/posts/${post.id}/edit`}
+                >
+                    수정
+                </Link>
             </div>
+
+            <h2>댓글 목록</h2>
+
+            {postComments === null && <div>댓글이 로딩중...</div>}
+
+            {postComments !== null && postComments.length > 0 && (
+                <ul>
+                    {postComments.map((comment) => (
+                        <li key={comment.id}>{comment.content}</li>
+                    ))}
+                </ul>
+            )}
         </>
     )
 }
