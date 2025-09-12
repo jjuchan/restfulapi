@@ -34,6 +34,45 @@ export default function Page({ params }: { params: Promise<{ id: number }> }) {
             method: 'DELETE',
         }).then((data) => {
             alert(data.msg)
+
+            if (postComments === null) return
+
+            setPostComments(
+                postComments.filter((comment) => comment.id !== commentId),
+            )
+        })
+    }
+
+    const handleSumbit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault()
+
+        const form = e.target as HTMLFormElement
+
+        const contentInput = form.elements.namedItem(
+            'content',
+        ) as HTMLTextAreaElement
+
+        if (
+            contentInput.value.trim() === '' ||
+            contentInput.value.length === 0
+        ) {
+            alert('댓글 내용을 입력해주세요.')
+            contentInput.focus()
+            return
+        }
+
+        apiFetch(`/api/v1/posts/${id}/comments`, {
+            method: 'POST',
+            body: JSON.stringify({
+                content: contentInput.value,
+            }),
+        }).then((data) => {
+            alert(data.msg)
+            contentInput.value = ''
+
+            if (postComments == null) return
+
+            setPostComments([...postComments, data.data])
         })
     }
 
@@ -69,6 +108,18 @@ export default function Page({ params }: { params: Promise<{ id: number }> }) {
                 </Link>
             </div>
 
+            <h2>댓글 작성</h2>
+            <form className="flex flex-col gap-2 p-2" onSubmit={handleSumbit}>
+                <textarea
+                    className="border p-2 rounded"
+                    name="content"
+                    placeholder="댓글 내용"
+                />
+                <button className="border p-2 rounded" type="submit">
+                    작성
+                </button>
+            </form>
+
             <h2>댓글 목록</h2>
 
             {postComments === null && <div>댓글이 로딩중...</div>}
@@ -77,7 +128,7 @@ export default function Page({ params }: { params: Promise<{ id: number }> }) {
                 <ul>
                     {postComments.map((comment) => (
                         <li key={comment.id}>
-                            {comment.content}
+                            {comment.id}/{comment.content}
                             <button
                                 className="p-2 rounded border"
                                 onClick={() =>
