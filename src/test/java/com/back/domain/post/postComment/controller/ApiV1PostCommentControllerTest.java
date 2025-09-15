@@ -25,7 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest // 스프링부트 테스트 클래스임을 나타냅니다.
 @AutoConfigureMockMvc // MockMvc를 자동으로 설정합니다.
 @Transactional // 각 테스트 메서드가 종료되면 롤백됩니다.
-public class ApiPostCommentControllerTest {
+public class ApiV1PostCommentControllerTest {
     @Autowired
     private MockMvc mvc; // MockMvc를 주입받습니다.
 
@@ -56,6 +56,7 @@ public class ApiPostCommentControllerTest {
                 .andExpect(jsonPath("$.id").value(postComment.getId()))
                 .andExpect(jsonPath("$.createDate").value(Matchers.startsWith(postComment.getCreateDate().toString().substring(0, 20))))
                 .andExpect(jsonPath("$.modifyDate").value(Matchers.startsWith(postComment.getModifyDate().toString().substring(0, 20))))
+                .andExpect(jsonPath("$.authorName").value(postComment.getAuthor().getNickname()))
                 .andExpect(jsonPath("$.content").value(postComment.getContent()));
     }
 
@@ -88,13 +89,13 @@ public class ApiPostCommentControllerTest {
                     .andExpect(jsonPath("$[%d].id".formatted(i)).value(postComment.getId()))
                     .andExpect(jsonPath("$[%d].createDate".formatted(i)).value(Matchers.startsWith(postComment.getCreateDate().toString().substring(0, 20))))
                     .andExpect(jsonPath("$[%d].modifyDate".formatted(i)).value(Matchers.startsWith(postComment.getModifyDate().toString().substring(0, 20))))
+                    .andExpect(jsonPath("$[%d].authorName".formatted(i)).value(postComment.getAuthor().getNickname()))
                     .andExpect(jsonPath("$[%d].content".formatted(i)).value(postComment.getContent()));
         }
     }
 
-    //댓글 삭제
     @Test
-    @DisplayName("댓글 삭제 다건")
+    @DisplayName("댓글 삭제")
     void t3() throws Exception {
         long postId = 1;
         long id = 1;
@@ -115,6 +116,7 @@ public class ApiPostCommentControllerTest {
                 .andExpect(jsonPath("$.resultCode").value("200-1"))
                 .andExpect(jsonPath("$.msg").value("%d번 댓글이 삭제되었습니다.".formatted(id)));
     }
+
     @Test
     @DisplayName("댓글 수정")
     void t4() throws Exception {
@@ -144,7 +146,6 @@ public class ApiPostCommentControllerTest {
                 .andExpect(jsonPath("$.msg").value("%d번 댓글이 수정되었습니다.".formatted(id)));
     }
 
-
     @Test
     @DisplayName("댓글 등록")
     void t5() throws Exception {
@@ -173,9 +174,10 @@ public class ApiPostCommentControllerTest {
                 .andExpect(handler().methodName("write"))
                 .andExpect(jsonPath("$.resultCode").value("201-1"))
                 .andExpect(jsonPath("$.msg").value("%d번 댓글이 작성되었습니다.".formatted(postComment.getId())))
-                .andExpect(jsonPath("$.data.id").value(post.getId()))
-                .andExpect(jsonPath("$.data.createDate").value(Matchers.startsWith(post.getCreateDate().toString().substring(0, 20))))
-                .andExpect(jsonPath("$.data.modifyDate").value(Matchers.startsWith(post.getModifyDate().toString().substring(0, 20))))
+                .andExpect(jsonPath("$.data.id").value(postComment.getId()))
+                .andExpect(jsonPath("$.data.createDate").value(Matchers.startsWith(postComment.getCreateDate().toString().substring(0, 20))))
+                .andExpect(jsonPath("$.data.modifyDate").value(Matchers.startsWith(postComment.getModifyDate().toString().substring(0, 20))))
+                .andExpect(jsonPath("$.data.authorName").value(postComment.getAuthor().getNickname()))
                 .andExpect(jsonPath("$.data.content").value("내용 new"));
     }
 }
