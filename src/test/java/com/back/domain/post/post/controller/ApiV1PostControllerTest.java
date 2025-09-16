@@ -41,12 +41,13 @@ public class ApiV1PostControllerTest {
     void t1() throws Exception {
         Member member = memberService.findByUsername("user1").get();
 
-        String authorApiKey = member.getApiKey();
+        String apiKey = member.getApiKey();
 
         //요청을 보냅니다.
         ResultActions resultActions = mvc
                 .perform(
-                        post("/api/v1/posts?apiKey=" + authorApiKey)
+                        post("/api/v1/posts")
+                                .header("Authorization", "Bearer " + apiKey)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content("""
                                         {
@@ -79,11 +80,16 @@ public class ApiV1PostControllerTest {
     @Test
     @DisplayName("글 쓰기 400 - 제목 누락")
     void t7() throws Exception {
+        Member member = memberService.findByUsername("user1").get();
+
+        String apiKey = member.getApiKey();
+
         //요청을 보냅니다.
         ResultActions resultActions = mvc
                 .perform(
                         post("/api/v1/posts")
                                 .contentType(MediaType.APPLICATION_JSON)
+                                .header("Authorization", "Bearer " + apiKey)
                                 .content("""
                                         {
                                             "title": "",
@@ -109,11 +115,17 @@ public class ApiV1PostControllerTest {
     @Test
     @DisplayName("글 쓰기 400 - 내용 누락")
     void t8() throws Exception {
+        Member member = memberService.findByUsername("user1").get();
+
+        String apiKey = member.getApiKey();
+
         //요청을 보냅니다.
         ResultActions resultActions = mvc
                 .perform(
                         post("/api/v1/posts")
                                 .contentType(MediaType.APPLICATION_JSON)
+                                .header("Authorization", "Bearer " + apiKey)
+
                                 .content("""
                                         {
                                             "title": "제목",
@@ -139,15 +151,20 @@ public class ApiV1PostControllerTest {
     @Test
     @DisplayName("글 쓰기 400 - JSON 문법 에러")
     void t9() throws Exception {
+        Member member = memberService.findByUsername("user1").get();
+
+        String apiKey = member.getApiKey();
+
         //요청을 보냅니다.
         ResultActions resultActions = mvc
                 .perform(
                         post("/api/v1/posts")
                                 .contentType(MediaType.APPLICATION_JSON)
+                                .header("Authorization", "Bearer " + apiKey)
                                 .content("""
                                         {
                                             "title": "제목",
-                                            "content": "내용"
+                                            content": "내용"
                                         }
                                         """)
                 )
@@ -168,11 +185,16 @@ public class ApiV1PostControllerTest {
     void t2() throws Exception {
         long id = 1;
 
+        Post post = postService.findById(id);
+
+        String apiKey = post.getAuthor().getApiKey();
+
         //요청을 보냅니다.
         ResultActions resultActions = mvc
                 .perform(
                         put("/api/v1/posts/" + id)
                                 .contentType(MediaType.APPLICATION_JSON)
+                                .header("Authorization", "Bearer " + apiKey)
                                 .content("""
                                         {
                                             "title": "제목 update",
@@ -200,11 +222,17 @@ public class ApiV1PostControllerTest {
     void t3() throws Exception {
         long id = 1;
 
+        Post post = postService.findById(id);
+
+        String apiKey = post.getAuthor().getApiKey();
+
         //요청을 보냅니다.
         ResultActions resultActions = mvc
                 .perform(
                         delete("/api/v1/posts/" + id)
+                                .header("Authorization", "Bearer " + apiKey)
                 )
+
                 .andDo(print()); // 응답을 출력합니다.
 
         // 200 Ok 상태코드 검증
