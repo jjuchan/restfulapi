@@ -102,8 +102,10 @@ public class MemberControllerTest {
 
         resultActions.andExpect(
                 result -> {
-                    Cookie apiKeyCookie = result.getResponse().getCookie("apiKey");
+                    Cookie apiKeyCookie= result.getResponse().getCookie("apiKey");
                     assertThat(apiKeyCookie.getValue()).isNotBlank();
+                    assertThat(apiKeyCookie.getPath()).isEqualTo("/");
+                    assertThat(apiKeyCookie.getAttribute("HttpOnly")).isEqualTo("true");
                 }
         );
     }
@@ -111,7 +113,7 @@ public class MemberControllerTest {
     @Test
     @DisplayName("내 정보")
     void t3() throws Exception {
-        Member actor = memberService.findByUsername("user1").get();
+        Member actor =  memberService.findByUsername("user1").get();
         String apiKey = actor.getApiKey();
 
         ResultActions resultActions = mvc
