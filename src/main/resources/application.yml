@@ -3,12 +3,16 @@ spring:
     name: back
   profiles:
     active: dev
+    include: secret
   output:
     ansi:
       enabled: always
   datasource:
     hikari:
       auto-commit: false
+  jackson:
+    serialization:
+      fail-on-empty-beans: false
   jpa:
     show-sql: true
     hibernate:
