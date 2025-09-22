@@ -42,9 +42,10 @@ public class ApiV1MemberController {
         Member member = memberService.findByUsername(reqBody.username())
                 .orElseThrow(() -> new ServiceException("401-1", "존재하지 않는 회원입니다."));
 
-        if (!member.getPassword().equals(reqBody.password())) {
-            throw new ServiceException("401-2", "비밀번호가 일치하지 않습니다.");
-        }
+        memberService.checkPassword(
+                member,
+                reqBody.password()
+        );
 
         String accessToken = memberService.genAccessToken(member);
 
@@ -59,16 +60,15 @@ public class ApiV1MemberController {
                         member.getApiKey(),
                         accessToken
                 )
-            );
+        );
 
     }
 
     @GetMapping("/me")
     public RsData<MemberDto> me() {
         Member actor = rq.getActor();
-        
-        //실시간성을 보장하기 위해 DB 조회
-        Member member = memberService.findById(actor.getId()).get();
+        // 실시간성을 보장하기위해 DB 조회
+        Member member  = memberService.findById(actor.getId()).get();
 
         return new RsData(
                 "200-1",
