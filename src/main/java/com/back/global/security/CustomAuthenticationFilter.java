@@ -5,6 +5,7 @@ import com.back.domain.member.member.service.MemberService;
 import com.back.global.Rq.Rq;
 import com.back.global.exception.ServiceException;
 import com.back.global.rsData.RsData;
+import com.back.standard.util.Ut;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -12,15 +13,12 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -41,12 +39,9 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
             RsData<Void> rsData = e.getRsData();
             response.setContentType("application/json");
             response.setStatus(rsData.statusCode());
-            response.getWriter().write("""
-                        {
-                            "resultCode": "%s",
-                            "msg": "%s"
-                        }
-                    """.formatted(rsData.resultCode(), rsData.msg()));
+            response.getWriter().write(
+                    Ut.json.toString(rsData)
+            );
         } catch(Exception e) {
             throw e;
         }
@@ -128,15 +123,12 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
             rq.setHeader("Authorization", actorAccessToken);
         }
 
-        Collection<? extends GrantedAuthority> authorities = member.isAdmin() ?
-                List.of(new SimpleGrantedAuthority("ROLE_ADMIN"))  :  List.of();
-
         UserDetails user = new SecurityUser(
                 member.getId(),
                 member.getUsername(),
                 "",
                 member.getNickname(),
-                authorities
+                member.getAuthorities()
         );
 
 

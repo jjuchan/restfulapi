@@ -59,7 +59,7 @@ public class ApiV1PostController {
 
         Post post = postService.findById(id);
 
-        post.checkActorCanModify(actor);
+        post.checkActorCanDelete(actor);
 
         postService.delete(post);
 
@@ -77,10 +77,10 @@ public class ApiV1PostController {
         Post post = postService.create(actor, reqBody.title(), reqBody.content());
 
         return new RsData<>(
-                        "201-1",
-                        "%d번 게시글이 생성되었습니다.".formatted(post.getId()),
-                        new PostDto(post)
-                );
+                "201-1",
+                "%d번 게시글이 생성되었습니다.".formatted(post.getId()),
+                new PostDto(post)
+        );
     }
 
     @PutMapping("/{id}")
@@ -95,11 +95,11 @@ public class ApiV1PostController {
         Post post = postService.findById(id);
         postService.update(post, reqBody.title(), reqBody.content());
 
-        post.checkActorCanDelete(actor);
+        post.checkActorCanModify(actor);
 
         return new RsData<>(
                 "200-1",
                 "%d번 게시글이 수정되었습니다.".formatted(id)
-                );
+        );
     }
 }
